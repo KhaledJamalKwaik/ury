@@ -238,25 +238,44 @@ async function fetchAndSetSiteName() {
     }
 }
 
+let socketPromise;
+
 async function initializeSocket() {
     await fetchAndSetSiteName();
     if (window.globalSiteName) {
         let site = window.globalSiteName;
-        let site_url = `${url}/${site}`;
-        socket = io(site_url,{ withCredentials: true });
-        console.log("socket == >",socket)
+        // In Frappe dev environment (port 8000), Socket.io usually runs on port 9000
+        let socket_url = url;
+        if (window.location.port == '8000') {
+            socket_url = `${protocol}//${host}:9000`;
+        }
+        
+        console.log("Initializing socket on:", socket_url, "with site:", site);
+
+        // Standard Frappe Socket.io connection with site query parameter
+        socket = io(socket_url, { 
+            withCredentials: true,
+            query: { site: site },
+            transports: ['websocket', 'polling']
+        });
+
+
+        console.log("socket object:", socket)
         socket.on('connect_error', (err) => {
             console.error("Socket connection error:", err);
         }); 
         socket.on('connect', () => {
-            console.log('Socket connected:', socket.connected);
+            console.log('Socket connected successfully');
         });
+        return socket;
     } else {
         console.error('Site name is not set. Socket cannot be initialized.');
+        return null;
     }
 }
 
-initializeSocket(); // Initialize the socket after fetching the site name
+socketPromise = initializeSocket();
+
 
 
 const frappe = new FrappeApp(url);
@@ -553,18 +572,18 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
     window.addEventListener("online", this.handleOnline);
     window.addEventListener("offline", this.handleOffline);
     document.addEventListener("click", this.hideAudioAlertMessage);
-    const currentUrl = window.location.href;
-    const parts = currentUrl.split("/");
-    const production = parts[parts.length - 1];
-    const decodedProduction = decodeURIComponent(production);
-    this.production = decodedProduction;
+    const production = this.$route.params.production || "Kitchen";
+    this.production = production;
+
     const self = this;
     window.addEventListener("resize", this.masonryLoading());
     this.masonryLoading();
+
+    await socketPromise;
 
     this.auth()
       .then(() => {
@@ -572,33 +591,36 @@ export default {
           if (this.audio_alert === 1) {
             this.showAudioAlertMessage = true;
           }
-          socket.on(this.kot_channel, (doc) => {
-            if (this.audio_alert === 1) {
-              this.playAlertSound(doc.audio_file);
-            }
-            let kottime = localStorage.getItem("kot_time");
-            if (doc.last_kot_time !== null) {
-              if (doc.last_kot_time !== kottime) {
-                this.fetchKOT().then(() => {
-                  this.masonryLoading();
-                });
+          if (socket) {
+            socket.on(this.kot_channel, (doc) => {
+              if (this.audio_alert === 1) {
+                this.playAlertSound(doc.audio_file);
               }
-            }
-            this.kot.unshift(doc.kot);
-            this.masonryLoading();
-            this.updateQtyColorTable();
-            this.updateTimeRemaining();
-            setTimeout(()=>{
-              if (doc.kot.type === "Cancelled"){
-                this.fetchKOT().then(() => {
-                  this.masonryLoading();
-                });
+              let kottime = localStorage.getItem("kot_time");
+              if (doc.last_kot_time !== null) {
+                if (doc.last_kot_time !== kottime) {
+                  this.fetchKOT().then(() => {
+                    this.masonryLoading();
+                  });
+                }
               }
-            },1500)
-            localStorage.setItem("kot_time", doc.kot.time);
-          });
+              this.kot.unshift(doc.kot);
+              this.masonryLoading();
+              this.updateQtyColorTable();
+              this.updateTimeRemaining();
+              setTimeout(() => {
+                if (doc.kot.type === "Cancelled") {
+                  this.fetchKOT().then(() => {
+                    this.masonryLoading();
+                  });
+                }
+              }, 1500)
+              localStorage.setItem("kot_time", doc.kot.time);
+            });
+          }
         });
       })
+
       .catch((error) => {
         console.error("Authentication error:", error);
         this.showModal = true;

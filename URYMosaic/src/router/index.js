@@ -5,17 +5,22 @@ import KOT from '../components/kot.vue';
 
 const routes = [
   {
-	path: "/",
+	path: "/:production",
 	name: "KOT",
 	component: KOT,
-  },  
+  },
+  {
+    path: "/",
+    redirect: "/Kitchen"
+  },
   ...authRoutes,
 ];
 
+
 const router = createRouter({
-  base: "/URYMosaic/",
-  history: createWebHistory(),
+  history: createWebHistory("/URYMosaic/"),
   routes,
 });
+
 
 export default router;

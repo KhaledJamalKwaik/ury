@@ -114,13 +114,11 @@ def served_kot_list():
         },
         order_by="creation desc",
     )
-    print(kotList,"kotList..................")
     KOT = []
     for kot in kotList:
         kotdoc = frappe.get_doc("URY KOT", kot.name)
-        print(kot.name,".................kotdoc")
         invoice=frappe.db.get_value("URY KOT",kot.name,"invoice")
-        print(invoice,".....................invoice")
+
         kotjson = json.loads(frappe.as_json(kotdoc))
         KOT.append(kotjson)
     return {
