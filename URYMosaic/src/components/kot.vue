@@ -38,145 +38,99 @@
     <!-- Alert Modal div end-->
 
     <div
-      class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4"
     >
       <div v-for="kot in this.kot" :key="kot.name">
         <div
-          :class="[kot.color]"
-          class="inline-block shadow-lg gap-4 p-3 rounded-2xl w-90 h-auto masonry-item"
-          style="margin-top: 28px"
+          class="rounded-lg border border-gray-200 bg-white p-4 shadow dark:border-gray-700 dark:bg-gray-800 relative transition-transform duration-200 hover:shadow-md cursor-pointer"
           v-if="!kot.showDiv && kot.production === production"
+          @click="rotateCard(kot)"
         >
-          <div class="w-64 check">
-            <div
-              :class="[{ hidden: !kot.isRotated }]"
-              @click="rotateCard(kot)"
-              class="absolute inset-0 bg-white z-50 opacity-80 rounded-2xl flex flex-col justify-center items-center"
-            >
-              <button
-                @click="
-                  kot.type === 'Cancelled' || kot.type === 'Partially cancelled'
-                    ? confirmOrder(kot)
-                    : serveOrder(kot)
-                "
-                :class="[{ hidden: !kot.isRotated }]"
-                class="py-2 px-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out"
-              >
-                {{
-                  kot.type === "Cancelled" || kot.type === "Partially cancelled"
-                    ? "Confirm"
-                    : "Serve"
-                }}
-              </button>
+          <!-- POS Style Waiter/Customer/Order Info Header -->
+          <div class="flex items-start space-x-4">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-xl font-semibold text-gray-900 dark:text-white">
+                {{ kot.tableortakeaway }}
+              </p>
+              <p class="truncate text-sm font-medium text-gray-500 dark:text-gray-400 mt-1" v-if="kot.user">
+                User : {{ kot.user }}
+              </p>
+              <p class="truncate text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Order #{{ this.daily_order_number ? kot.order_no : kot.invoice.slice(-4) }}
+              </p>
+              
+              <div v-if="kot.is_aggregator" class="mt-2">
+                <p class="truncate text-sm font-medium text-blue-600 dark:text-blue-400">{{ kot.customer_name }} (Aggregator)</p>
+                <p class="truncate text-xs text-gray-500 dark:text-gray-400">ID: {{ kot.aggregator_id }}</p>
+              </div>
             </div>
-
             
-              <!-- Serve Button -->
-
-              <!-- Card Header: Table Name and Order Number -->
-              <div class="flex justify-between" @click="rotateCard(kot)">
-                <div class="text-sm w-48">
-                  <span
-                    v-if="kot.tableortakeaway !== 'Takeaway'"
-                    class="text-sm font-medium text-[#6B7280]"
-                    >Table
-                  </span>
-                  <span class="text-black-500 font-semibold">
-                    {{ kot.tableortakeaway }}
-                    <span class="text-sm font-medium text-[#6B7280]"
-                      >( {{ kot.user }} )</span
-                    ></span
-                  ><br />
-                  <span v-if="kot.is_aggregator" class="text-sm font-medium text-[#6B7280]">Aggregator</span>
-                  <span v-if="kot.is_aggregator" class="text-black-500 ml-2 font-semibold"
-                    >{{ kot.customer_name }}
-                  </span><br v-if="kot.is_aggregator" />
-                  <span v-if="kot.is_aggregator" class="text-sm font-medium text-[#6B7280]">Aggregator ID</span>
-                  <span v-if="kot.is_aggregator" class="text-black-500 ml-2 font-semibold"
-                    >{{ kot.aggregator_id }}
-                  </span><br v-if="kot.is_aggregator"/>
-                  <span class="text-sm font-medium text-[#6B7280]">Order</span>
-                  <span class="text-black-500 ml-2 font-semibold"
-                    >{{ this.daily_order_number ? kot.order_no : kot.invoice.slice(-4) }}
-                    
-                  </span>
-                  <span
-                    class="text-black-500 ml-2 font-semibold"
-                    v-if="
-                      kot.type === 'Partially cancelled' ||
-                      kot.type === 'Cancelled'
-                    "
-                  >
-                    ( {{ kot.type }} )</span
-                  >
-                </div>
-                <div
-                  :class="kot.timecolor"
-                  class="font-inter font-semibold text-2xl leading-10"
-                >
+            <div class="items-center space-x-4 text-right">
+              <div class="min-w-0 flex-1">
+                <p :class="[kot.timecolor]" class="mr-2 truncate text-xl font-semibold">
                   {{ kot.timeRemaining }}
+                </p>
+                <p class="mr-2 mt-2 truncate text-sm text-gray-500 dark:text-gray-400 underline decoration-red-500" v-if="kot.type === 'Partially cancelled' || kot.type === 'Cancelled'">
+                  {{ kot.type }}
+                </p>
+                <div class="ml-5 mt-2" v-if="kot.type === 'Duplicate'">
+                    <span class="text-xs text-red-500 font-bold border border-red-500 rounded px-1.5 py-0.5">DUPLICATE</span>
                 </div>
               </div>
-              <div
-                v-if="kot.type === 'Duplicate'"
-                class="text-[#DC0000] font-medium"
-              >
-                ( Duplicate KOT ( CHECK WITH CAPTAIN ) )
-              </div>
-              <div v-show="kot.comments" class="text-[#6B7280] font-medium">
-                ( {{ kot.comments }} )
-              </div>
-              <div></div>
-              <div>
-                <div
-                  class="font-semibold justify-between items-center mt-2"
-                  v-for="kotitem in sortedKotItems(kot)"
-                  :key="kotitem.name"
-                >
-                  <div
-                    @click="
-                      () => {
-                        toggleItemStrikeThrough(kotitem, kot);
-                      }
-                    "
-                    :class="{
-                      'line-through text-green-700': kotitem.striked,
-                    }"
-                    class="flex font-semibold justify-between items-center"
-                  >
-                    <div>
-                      <span class="ml-2 text-black-100">{{
-                        kotitem.item_name
-                      }}<span v-show="kotitem.indicate_course" class="text-sm text-gray-500 ml-1"> ( {{kotitem.course}} )</span>
-                      </span
-                      ><br />
-                      <span
-                        class="ml-2 text-black-100"
-                        v-if="
-                          kot.type === 'Partially cancelled' ||
-                          kot.type === 'Cancelled'
-                        "
-                        >[Old Qty = {{ kotitem.quantity }}]</span
-                      >
-                    </div>
-                    <div>
-                      <span class="ml-2 text-black-100">{{ kotitem.qty }}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p
-                      v-show="kotitem.comments"
-                      class="ml-2 text-[#6B7280] font-medium"
-                    >
-                      {{ kotitem.comments }}
-                    </p>
-                    <hr class="my-1 border-gray-200 mt-2" />
-                  </div>
-                </div>
-              </div>
-            
+            </div>
           </div>
-          <!-- You can add more item/quantity pairs here as needed -->
+
+          <!-- Notes / Comments -->
+          <div v-show="kot.comments" class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded border border-yellow-200 dark:border-yellow-700">
+             <p class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Note: {{ kot.comments }}</p>
+          </div>
+
+          <div class="mb-2 mt-4 border-b pb-2 dark:border-gray-700">
+            <p class="truncate text-lg font-semibold text-gray-900 dark:text-white">
+              Items
+            </p>
+          </div>
+          
+          <!-- POS Style Item List Box -->
+          <div class="w-full rounded bg-gray-50 dark:bg-gray-700 p-2">
+            <div
+              class="ml-2 mt-2 border-b border-gray-200 dark:border-gray-600 pb-2 last:border-0"
+              v-for="kotitem in sortedKotItems(kot)"
+              :key="kotitem.name"
+            >
+              <div class="flex items-center space-x-4" 
+                   @click.stop="toggleItemStrikeThrough(kotitem, kot)"
+                   :class="{'opacity-50 line-through decoration-gray-500': kotitem.striked}"
+              >
+                <div class="min-w-2 flex-1">
+                  <p class="text-base text-gray-800 dark:text-white font-medium">
+                    {{ kotitem.item_name }} <span v-show="kotitem.indicate_course" class="text-xs text-gray-500 dark:text-gray-400">({{ kotitem.course }})</span>
+                  </p>
+                  <p v-show="kotitem.comments" class="text-sm text-gray-600 dark:text-gray-300 mt-1 italic before:content-['↳_']">
+                    {{ kotitem.comments }}
+                  </p>
+                  <p v-if="kot.type === 'Partially cancelled' || kot.type === 'Cancelled'" class="text-xs text-red-500 mt-0.5">
+                    Original Qty: {{ kotitem.quantity }}
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4 text-right">
+                  <p class="text-lg font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 px-3 py-1 rounded shadow-sm border dark:border-gray-600">
+                    x{{ kotitem.qty }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- POS Style Print/Action Buttons (Replacing the overlay) -->
+          <div class="mt-4 flex flex-col gap-2" v-if="kot.isRotated">
+            <button
+               @click.stop="kot.type === 'Cancelled' || kot.type === 'Partially cancelled' ? confirmOrder(kot) : serveOrder(kot)"
+               class="w-full rounded bg-blue-600 px-4 py-3 text-white font-bold tracking-wide hover:bg-blue-700 transition"
+            >
+               {{ kot.type === "Cancelled" || kot.type === "Partially cancelled" ? "CONFIRM CANCELLATION" : "SERVE ORDER" }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
