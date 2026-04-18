@@ -421,18 +421,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           }
 
           this.table = this.pastOrder.restaurant_table;
-          if (this.invoicePrinted === 0) {
-            this.alert.createAlert(
-              "Alert",
-              "Please Print Invoice before Payment",
-              "OK"
-            );
-            this.isLoading = false;
-            this.showPayment = false;
-
-          } else {
-            this.showPayment = true;
-          }
+          this.showPayment = true;
         })
         .catch((error) => console.error(error));
     },
