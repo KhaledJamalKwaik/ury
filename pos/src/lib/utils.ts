@@ -9,7 +9,18 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(amount: number): string {
   const symbol = storage.getItem('currencySymbol');
   return `${symbol} ${amount}`;
-} 
+}
+
+export function getFileUrl(path: string | null): string | null {
+  if (!path) return null;
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  
+  const baseUrl = import.meta.env.VITE_FRAPPE_BASE_URL || '';
+  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  
+  return `${cleanBaseUrl}${cleanPath}`;
+}
 
 export const formatInvoiceTime = (timestamp: string | null) => {
     if (!timestamp) return 'No bill activity yet';

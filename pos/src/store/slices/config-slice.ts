@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { AuthSlice } from './auth-slice';
 import { getCombinedPosProfile, PosProfileCombined } from '../../lib/pos-profile-api';
+import { getBrandLogo } from '../../lib/website-settings-api';
 
 interface RolePermission {
   name: string;
@@ -23,12 +24,14 @@ export interface ConfigState {
   error: string | null;
   hasAccess: boolean;
   posProfile: PosProfileCombined | null;
+  brandLogo: string | null;
 }
 
 export interface ConfigActions {
   checkAccess: () => void;
   setAllowedRoles: (roles: string[]) => void;
   fetchPosProfile: (forceRefresh?: boolean) => Promise<void>;
+  fetchWebsiteSettings: () => Promise<void>;
 }
 
 export type ConfigSlice = ConfigState & ConfigActions;
@@ -39,6 +42,7 @@ const initialState: ConfigState = {
   error: null,
   hasAccess: false,
   posProfile: null,
+  brandLogo: null,
 };
 
 export const createConfigSlice: StateCreator<
@@ -58,6 +62,7 @@ export const createConfigSlice: StateCreator<
       if (cached && !forceRefresh) {
         const profile = JSON.parse(cached);
         set({ posProfile: profile });
+        get().fetchWebsiteSettings();
         // Extract and set allowed roles from the profile
         const allowedRoles = profile.role_allowed_for_billing?.map((role: RolePermission) => role.role) || [];
         console.log("allowedRoles", allowedRoles);
@@ -67,11 +72,14 @@ export const createConfigSlice: StateCreator<
       }
 
       // If not in cache or forcing refresh, fetch from API
-      const profile = await getCombinedPosProfile();
+      const [profile, logo] = await Promise.all([
+        getCombinedPosProfile(),
+        getBrandLogo()
+      ]);
       
       // Cache the profile
       sessionStorage.setItem('posProfile', JSON.stringify(profile));
-      set({ posProfile: profile });
+      set({ posProfile: profile, brandLogo: logo });
 
       // Extract and set allowed roles from the profile
       const allowedRoles = profile.role_allowed_for_billing?.map((role: RolePermission) => role.role) || [];
@@ -109,4 +117,13 @@ export const createConfigSlice: StateCreator<
     // After setting new roles, recheck access
     get().checkAccess();
   },
-}); 
+
+  fetchWebsiteSettings: async () => {
+    try {
+      const logo = await getBrandLogo();
+      set({ brandLogo: logo });
+    } catch (error) {
+      console.error('Failed to fetch website settings:', error);
+    }
+  },
+});

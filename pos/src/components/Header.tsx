@@ -15,6 +15,7 @@ import { usePOSStore } from '../store/pos-store';
 import type { RootState } from '../store/root-store';
 import { logout } from '../lib/auth-api';
 import { showToast } from './ui/toast';
+import { getFileUrl } from '../lib/utils';
 
 const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -23,7 +24,7 @@ const Header = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const { searchQuery, setSearchQuery } = usePOSStore();
-  const { orderSearchQuery, setOrderSearchQuery } = useRootStore();
+  const { orderSearchQuery, setOrderSearchQuery, brandLogo } = useRootStore();
   const [orderSearchInput, setOrderSearchInput] = useState(orderSearchQuery);
 
   // Determine placeholder and handlers based on route
@@ -110,9 +111,13 @@ const Header = () => {
         <div className="flex items-center">
         <Link to="/" className="flex items-center gap-3">
             <img 
-              src="/assets/ury/pos/ury_pos.png" 
-              alt="URY POS" 
-              className="h-10 w-auto"
+              src={getFileUrl(brandLogo) || "/assets/ury/Images/URY-POS.jpg"} 
+              alt="Brand Logo" 
+              className="h-10 w-auto object-contain"
+              onError={(e) => {
+                console.warn('Brand logo failed to load, falling back to default.');
+                e.currentTarget.src = "/assets/ury/Images/URY-POS.jpg";
+              }}
             />
           </Link>
         </div>

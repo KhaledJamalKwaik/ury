@@ -4,10 +4,7 @@ import App from "./App.vue";
 
 import router from './router';
 
-import { FrappeApp } from "frappe-js-sdk";
-
-const url = window.location.origin;
-const frappe = new FrappeApp(url);
+import { frappe } from "./lib/frappe";
 
 const auth = reactive({
 	isLoggedIn: false,

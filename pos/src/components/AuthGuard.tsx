@@ -19,6 +19,7 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
     isLoading: configLoading,
     error: configError,
     hasAccess,
+    fetchWebsiteSettings,
   } = useRootStore();
 
   // State to track if we're rechecking permissions
@@ -33,8 +34,9 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchPosProfile();
+      fetchWebsiteSettings();
     }
-  }, [user, fetchPosProfile]);
+  }, [user, fetchPosProfile, fetchWebsiteSettings]);
 
   // Show loading state while either auth or config is loading
   if (authLoading || (user && configLoading) || isRechecking) {
