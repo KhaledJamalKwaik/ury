@@ -8,6 +8,7 @@ import { getCustomerGroups, getCustomerTerritories } from '../lib/customer-api';
 import { DEFAULT_ORDER_TYPE, OrderType } from '../data/order-types';
 import { getTableOrder, TableOrder } from '../lib/order-api';
 import { getPaymentModes } from '../lib/payment-api';
+import { db } from '../lib/frappe-sdk';
 
 // Constants
 const MAX_QUANTITY = 99;
@@ -145,6 +146,7 @@ interface POSStore extends POSState {
   fetchCustomerGroups: () => Promise<void>;
   fetchTerritories: () => Promise<void>;
   fetchCurrencySymbol: () => Promise<void>;
+  fetchDefaultCustomer: (profile?: PosProfileCombined) => Promise<void>;
   getCartTotals: () => CartTotals;
   itemExistsInCart: (uniqueId: string) => boolean;
   validateQuantity: (quantity: number) => boolean;
@@ -238,7 +240,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
 
   fetchPosProfile: async () => {
     try {
-      const cached = sessionStorage.getItem('posProfile');
+      const cached = sessionStorage.getItem('posProfile_v3');
       if (cached) {
         const profile = JSON.parse(cached);
         set({ 
@@ -249,13 +251,14 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         if (!storage.getItem('currencySymbol')) {
           await get().fetchCurrencySymbol();
         }
+        await get().fetchDefaultCustomer(profile);
         return;
       }
 
       set({ profileLoading: true, error: null });
       const combinedProfile = await getCombinedPosProfile();
       
-      sessionStorage.setItem('posProfile', JSON.stringify(combinedProfile));
+      sessionStorage.setItem('posProfile_v3', JSON.stringify(combinedProfile));
       set({ 
         posProfile: combinedProfile, 
         profileLoading: false,
@@ -265,6 +268,8 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       if (!storage.getItem('currencySymbol')) {
         await get().fetchCurrencySymbol();
       }
+
+      await get().fetchDefaultCustomer(combinedProfile);
     } catch (error) {
       console.error('Error fetching POS profile:', error);
       set({ 
@@ -286,6 +291,34 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       console.error('Error fetching currency symbol:', error);
       set({ currencySymbol: get().currency });
       storage.setItem('currencySymbol', get().currency);
+    }
+  },
+
+  fetchDefaultCustomer: async (profile?: PosProfileCombined) => {
+    const posProfile = profile || get().posProfile;
+    if (!posProfile?.customer) return;
+
+    set({
+      selectedCustomer: {
+        id: posProfile.customer,
+        name: posProfile.customer,
+        phone: '',
+      }
+    });
+
+    try {
+      const doc = await db.getDoc('Customer', posProfile.customer);
+      if (doc) {
+        set({
+          selectedCustomer: {
+            id: doc.name,
+            name: doc.customer_name || doc.name,
+            phone: doc.mobile_number || '',
+          }
+        });
+      }
+    } catch (error) {
+      // fallback already set 
     }
   },
 
@@ -634,6 +667,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
           isUpdatingOrder: false,
           orderId: null,
         });
+        get().fetchDefaultCustomer();
       }
     } catch (error) {
       set({ 
@@ -644,6 +678,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         isUpdatingOrder: false,
         orderId: null,
       });
+      get().fetchDefaultCustomer();
     } finally {
       set({ orderLoading: false });
     }
@@ -657,6 +692,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       isUpdatingOrder: false,
       orderId: null,
     });
+    get().fetchDefaultCustomer();
   },
 
   setOrderForUpdate: (orderId: string | null) => {
@@ -685,6 +721,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       orderComment: '',
     });
 
+    get().fetchDefaultCustomer();
     fetchMenuItems();
   },
 
@@ -697,4 +734,4 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     const state = get();
     return state.orderLoading;
   }
-})); 
+}));

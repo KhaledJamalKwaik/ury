@@ -39,6 +39,7 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
     cancelReason: null,
     invoiceNumber: null,
     multipleCashier:null,
+    customer: null,
     tableInvoiceNo: null,
     tableAttention: null,
     modeOfPaymentList: null,
@@ -89,6 +90,13 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
           this.enableKotReprint=this.invoiceDetails.enable_kot_reprint;
           this.multipleCashier=this.invoiceDetails.multiple_cashier
           this.editOrderType=this.invoiceDetails.edit_order_type
+          this.customer=this.invoiceDetails.customer
+
+          if (this.customer) {
+            this.customers.selectedCustomerName = this.customer;
+            this.customers.search = this.customer;
+            this.customers.newCustomerMobileNo = "";
+          }
           if (this.qz_host) {
             loadQzPrinter(this.qz_host);
           }
@@ -392,6 +400,11 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
       this.recentOrders.selectedTable = "";
       this.customers.selectedOrderType = "";
       this.menu.selectedOrderType = "";
+      if (this.customer) {
+        this.customers.selectedCustomerName = this.customer;
+        this.customers.search = this.customer;
+        this.customers.newCustomerMobileNo = "";
+      }
     },
     billing(table) {
       let tables = table.name;

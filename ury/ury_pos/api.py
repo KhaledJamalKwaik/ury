@@ -550,7 +550,8 @@ def getPosProfile():
         "multiple_cashier":multiple_cashier,
         "owner":owner,
         "edit_order_type":edit_order_type,
-        "enable_kot_reprint":enable_kot_reprint
+        "enable_kot_reprint":enable_kot_reprint,
+        "customer": pos_profiles.customer
 
     }
 
