@@ -25,13 +25,13 @@ const MenuCard: FC<MenuCardProps> = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-56 flex flex-col",
+        "bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-44 sm:h-52 md:h-56 flex flex-col",
         disabled && "opacity-50 cursor-not-allowed pointer-events-none"
       )}
       onClick={disabled ? undefined : onClick}
     >
       {/* Image section - fixed height */}
-      <div className="h-24">
+      <div className="h-20 sm:h-24">
         {item_image ? (
           <img
             src={item_image}

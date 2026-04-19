@@ -327,40 +327,41 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
   return (
     <div className="flex flex-col h-full bg-gray-50">
       {/* Header Controls */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 p-3 md:p-4 flex-shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
             <Button
               onClick={onBackToGrid}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-9 px-3"
             >
               <Grid3X3 className="w-4 h-4" />
-              {t('tables.grid_view')}
+              <span className="hidden sm:inline">{t('tables.grid_view')}</span>
+              <span className="sm:hidden">Grid</span>
             </Button>
-            <h2 className="text-lg font-semibold">{selectedRoom} <span className="text-gray-400 mx-2">|</span> {t('tables.layout')}</h2>
+            <h2 className="text-base md:text-lg font-semibold truncate">
+              {selectedRoom} <span className="hidden sm:inline text-gray-400 mx-1">|</span> <span className="hidden sm:inline">{t('tables.layout')}</span>
+            </h2>
           </div>
           <div className="flex items-center gap-2">
-            {/* Edit Mode Toggle */}
-            <div className="">
-              <button
-                onClick={() => {
-                  if (isEditMode) {
-                    onRefresh?.();
-                  }
-                  setIsEditMode(!isEditMode);
-                }}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all',
-                  isEditMode
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-green-700'
-                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                )}
-              >
-                {isEditMode ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-                {isEditMode ? t('tables.finish_editing') : t('tables.edit_layout')}
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                if (isEditMode) {
+                  onRefresh?.();
+                }
+                setIsEditMode(!isEditMode);
+              }}
+              className={cn(
+                'flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm font-medium border transition-all',
+                isEditMode
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-700'
+                  : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+              )}
+            >
+              {isEditMode ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+              <span className="hidden xs:inline">{isEditMode ? t('tables.finish_editing') : t('tables.edit_layout')}</span>
+              <span className="xs:hidden">{isEditMode ? 'Save' : 'Edit'}</span>
+            </button>
           </div>
         </div>
       </div>

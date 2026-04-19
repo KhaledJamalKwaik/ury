@@ -230,51 +230,54 @@ const TableView = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 bg-white border-b border-gray-200">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="p-3 md:p-4 bg-white border-b border-gray-200 flex-shrink-0">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-col gap-3">
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+              <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto scrollbar-hide pb-2 md:pb-0">
                 {loadingRooms && (
-                  <div className="flex-1 min-w-[160px]">
-                    <Spinner message="Loading rooms..." />
+                  <div className="flex-shrink-0">
+                    <Spinner size="sm" />
                   </div>
                 )}
 
                 {!loadingRooms && !hasRooms && (
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-gray-500 text-sm whitespace-nowrap">
                     <AlertTriangle className="w-4 h-4" />
-                    No rooms found for this branch
+                    No rooms found
                   </div>
                 )}
 
-                {rooms.map(room => (
-                  <Button
-                    key={room.name}
-                    variant="tab"
-                    data-selected={selectedRoom === room.name}
-                    onClick={() => handleRoomChange(room.name)}
-                    className="h-fit"
-                  >
-                    {room.name}
-                    {typeof roomCounts[room.name] === 'number' ? (
-                      <Badge variant="outline" className="ml-2 bg-white/60">
-                        {roomCounts[room.name]}
-                      </Badge>
-                    ) : null}
-                  </Button>
-                ))}
+                <div className="flex items-center gap-2 min-w-max">
+                  {rooms.map(room => (
+                    <Button
+                      key={room.name}
+                      variant="tab"
+                      data-selected={selectedRoom === room.name}
+                      onClick={() => handleRoomChange(room.name)}
+                      className="h-9 px-3 text-sm whitespace-nowrap"
+                    >
+                      {room.name}
+                      {typeof roomCounts[room.name] === 'number' ? (
+                        <Badge variant="outline" className="ml-2 bg-white/60 px-1.5 py-0">
+                          {roomCounts[room.name]}
+                        </Badge>
+                      ) : null}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 self-end md:self-auto">
                 <Button
                   variant="tab"
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm h-9"
                   onClick={() => handleLayoutView()}
                 >
                   <Layout className="w-4 h-4" />
-                  {t('tables.layout_view')}
+                  <span className="hidden sm:inline">{t('tables.layout_view')}</span>
+                  <span className="sm:hidden">Layout</span>
                 </Button>
               </div>
             </div>
@@ -297,7 +300,7 @@ const TableView = () => {
               <p>{t('tables.no_tables_found')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {tablesToDisplay.map(table => {
                 const isOccupied = table.occupied === 1;
 
@@ -312,80 +315,96 @@ const TableView = () => {
                       }
                     }}
                     className={cn(
-                      'relative bg-white rounded-lg border-2 p-4 transition-all flex flex-col justify-between gap-y-4',
+                      'relative bg-white rounded-xl border p-3 md:p-4 transition-all flex flex-col justify-between gap-y-3 shadow-sm',
                       isOccupied
-                        ? 'border-amber-400 bg-amber-50 text-amber-900'
-                        : 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:border-emerald-400 hover:shadow-md cursor-pointer',
+                        ? 'border-amber-200 bg-amber-50/50'
+                        : 'border-emerald-200 bg-emerald-50/50 hover:border-emerald-400 hover:shadow-md cursor-pointer',
                     )}
                   >
+                    {/* Status Badge - Absolute Top Right */}
+                    <div className="absolute top-2 end-2">
+                       <Badge variant={isOccupied ? 'warning' : 'success'} className="px-1.5 py-0.5 text-[10px] md:text-xs">
+                         {isOccupied ? t('tables.occupied') : t('tables.available')}
+                       </Badge>
+                    </div>
+
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <TableShapeIcon shape={table.table_shape || 'Rectangle'} />
-                          <span className="font-semibold text-lg text-gray-900">{table.name}</span>
+                      <div className="flex items-center gap-2 mb-3 pe-16">
+                        <div className="p-1.5 rounded-lg bg-emerald-50 border border-emerald-100 shadow-sm">
+                          <TableShapeIcon shape={table.table_shape || 'Rectangle'} className="w-4 h-4 text-emerald-600" />
                         </div>
-                        <Badge variant={isOccupied ? 'warning' : 'success'}>
-                          {isOccupied ? t('tables.occupied') : t('tables.available')}
-                        </Badge>
+                        <span className="font-bold text-base md:text-lg text-gray-900 truncate" title={table.name}>
+                          {table.name}
+                        </span>
                       </div>
 
-                      <div className="space-y-2 text-sm text-gray-700">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{t('tables.room')}</span>
-                          <span>{table.restaurant_room}</span>
+                      <div className="space-y-2">
+                        {/* Room Info */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('tables.room')}</span>
+                          <span className="text-xs md:text-sm font-medium text-gray-600 truncate">{table.restaurant_room}</span>
                         </div>
+
+                        {/* Timing Info - Only if occupied */}
                         {isOccupied && (
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">Started at</span>
-                            <span>{formatInvoiceTime(table.latest_invoice_time)}</span>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-2 pt-2 border-t border-amber-100">
+                            <span className="text-[10px] uppercase tracking-wider text-amber-600/70 font-bold">Started at</span>
+                            <span className="text-xs md:text-sm font-bold text-amber-900">{formatInvoiceTime(table.latest_invoice_time)}</span>
                           </div>
                         )}
+
+                        {/* Capacity Info */}
                         {typeof table.no_of_seats === 'number' && (
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">{t('tables.seats')}</span>
-                            <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" />
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-2 pt-2 border-t border-gray-100">
+                            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('tables.seats')}</span>
+                            <span className="flex items-center gap-1 text-xs md:text-sm font-medium text-gray-700">
+                              <Users className="w-3.5 h-3.5 text-gray-400" />
                               {table.no_of_seats}
                             </span>
                           </div>
                         )}
+                        
                         {table.is_take_away === 1 && (
-                          <Badge variant="pending" className="mt-2">
-                            Take away
-                          </Badge>
+                          <div className="mt-2 text-right">
+                            <Badge variant="pending" className="text-[10px] py-0 px-1.5 font-medium">
+                              Take away
+                            </Badge>
+                          </div>
                         )}
                       </div>
                     </div>
 
                     {isOccupied ? (
-                      <div className="flex gap-2 pt-3 mt-3 border-t border-amber-200">
+                      <div className="flex gap-2 pt-3 mt-1">
                         <button
                           onClick={(event) => handlePreviewTable(table, event)}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded bg-white hover:bg-amber-100 transition"
+                          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition shadow-sm active:scale-95"
                         >
-                          <Eye className="w-3 h-3" />
+                          <Eye className="w-3.5 h-3.5" />
                           Preview
                         </button>
                         <button
                           onClick={(event) => handlePrintTable(table, event)}
                           disabled={printingTable === table.name}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded bg-white hover:bg-amber-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                          className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg border border-blue-100 bg-blue-50 hover:bg-blue-100 text-blue-700 transition shadow-sm active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                           {printingTable === table.name ? (
                             <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              Printing...
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ...
                             </>
                           ) : (
                             <>
-                              <Printer className="w-3 h-3" />
+                              <Printer className="w-3.5 h-3.5" />
                               Print
                             </>
                           )}
                         </button>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-500">{t('tables.tap_to_start')}</p>
+                      <div className="pt-2 border-t border-emerald-100 mt-1">
+                         <p className="text-[10px] md:text-xs text-emerald-600 font-medium">{t('tables.tap_to_start')}</p>
+                      </div>
                     )}
                   </div>
                 );
@@ -396,16 +415,16 @@ const TableView = () => {
       </div>
 
       {/* Status Legend */}
-      <div className="fixed bottom-[4.5rem] w-full p-4 bg-white border-t border-gray-200">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="flex items-center justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-              <span>{t('tables.available')}</span>
+      <div className="bg-white border-t border-gray-200 py-3 flex-shrink-0">
+        <div className="max-w-screen-xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-8 text-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="w-3.5 h-3.5 bg-emerald-50 border border-emerald-300 rounded-sm"></div>
+              <span className="text-gray-600 font-medium">{t('tables.available')}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-              <span>{t('tables.occupied')}</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-3.5 h-3.5 bg-amber-50 border border-amber-300 rounded-sm"></div>
+              <span className="text-gray-600 font-medium">{t('tables.occupied')}</span>
             </div>
           </div>
         </div>

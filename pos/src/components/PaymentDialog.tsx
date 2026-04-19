@@ -148,9 +148,9 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent variant="xlarge" className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row p-0" showCloseButton={false}>
+      <DialogContent variant="xlarge" className="bg-white w-full max-w-4xl md:max-h-[85vh] flex flex-col md:flex-row p-0" showCloseButton={false}>
         {/* Left Column - Discount and Payment Mode */}
-        <div className="md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-gray-200 overflow-y-auto">
+        <div className="w-full md:w-1/2 p-4 md:p-6 border-b md:border-b-0 md:border-r border-gray-200 overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">{t('payment.title')}</h2>
             <Button
@@ -231,7 +231,7 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
         </div>
 
         {/* Right Column - Order Summary and Pay Button */}
-        <div className="md:w-1/2 p-6 overflow-y-auto">
+        <div className="w-full md:w-1/2 p-4 md:p-6 overflow-y-auto">
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">

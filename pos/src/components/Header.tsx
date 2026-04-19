@@ -96,24 +96,24 @@ const Header = () => {
   };
 
   const handleClearCache = () => {
-    // Clear all local storage
     localStorage.clear();
-    // Clear all session storage
     sessionStorage.clear();
-    // Reload the page
     window.location.reload();
   };
 
+  const showMobileSearch = location.pathname === '/' || location.pathname === '/orders';
+
   return (
     <header className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between h-16 px-6">
+      {/* Main header row */}
+      <div className="flex items-center justify-between h-14 md:h-16 px-3 md:px-6">
         {/* Logo */}
-        <div className="flex items-center">
-        <Link to="/" className="flex items-center gap-3">
+        <div className="flex items-center flex-shrink-0">
+          <Link to="/" className="flex items-center gap-3">
             <img 
               src={getFileUrl(brandLogo) || "/assets/ury/Images/URY-POS.jpg"} 
               alt="Brand Logo" 
-              className="h-10 w-auto object-contain"
+              className="h-8 md:h-10 w-auto object-contain"
               onError={(e) => {
                 console.warn('Brand logo failed to load, falling back to default.');
                 e.currentTarget.src = "/assets/ury/Images/URY-POS.jpg";
@@ -122,35 +122,35 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Search Bar */}
-        <div className="px-4 py-2 flex-1 flex items-center max-w-2xl mx-8  bg-gray-50 hover:bg-gray-100 border border-input rounded-md">
-            <Input
-              ref={searchInputRef}
-              placeholder={searchPlaceholder}
-              className="h-fit p-0 w-full bg-transparent border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              value={searchValue}
-              onChange={searchOnChange}
-            />
-            <div className="flex items-center gap-2 text-gray-400">
-              <Command className="w-4 h-4" />
-              <span>K</span>
-            </div>
+        {/* Search Bar — hidden on mobile, shown md+ inline */}
+        <div className="hidden md:flex px-4 py-2 flex-1 items-center mx-4 md:mx-8 bg-gray-50 hover:bg-gray-100 border border-input rounded-md">
+          <Input
+            ref={searchInputRef}
+            placeholder={searchPlaceholder}
+            className="h-fit p-0 w-full bg-transparent border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            value={searchValue}
+            onChange={searchOnChange}
+          />
+          <div className="flex items-center gap-2 text-gray-400">
+            <Command className="w-4 h-4" />
+            <span>K</span>
+          </div>
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* User menu */}
           <div className="relative" ref={userMenuRef}>
             <Button
               onClick={handleUserMenuToggle}
               variant="ghost"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-gray-900 px-1.5 md:px-3"
             >
-              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-medium">{user?.full_name || 'User'}</span>
-              <ChevronDown className="w-4 h-4" />
+              <span className="hidden md:block text-sm font-medium max-w-[120px] truncate">{user?.full_name || 'User'}</span>
+              <ChevronDown className="hidden md:block w-4 h-4" />
             </Button>
 
             {/* User dropdown */}
@@ -191,8 +191,22 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile search strip — shown below the icons row only on small screens */}
+      {showMobileSearch && (
+        <div className="flex md:hidden px-3 pb-2">
+          <div className="flex items-center w-full bg-gray-50 border border-input rounded-md px-3 py-1.5">
+            <Input
+              placeholder={searchPlaceholder}
+              className="h-fit p-0 w-full bg-transparent border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
+              value={searchValue}
+              onChange={searchOnChange}
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 };
 
-export default Header; 
+export default Header;

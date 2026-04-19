@@ -34,16 +34,20 @@ function App() {
         <AuthGuard>
           <POSOpeningProvider>
             <Router basename="/pos">
-              <div className="flex flex-col h-screen bg-gray-100 font-inter">
-                <Header />
-                <div className="flex-1 overflow-hidden">
+              <div className="flex flex-col h-screen bg-gray-100 font-inter overflow-hidden">
+                <div className="flex-shrink-0 z-30">
+                  <Header />
+                </div>
+                <div className="flex-1 overflow-hidden relative">
                   <Routes>
                     <Route path="/" element={<POS/>} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/table" element={<Table />} />
                   </Routes>
                 </div>
-                <Footer />
+                <div className="flex-shrink-0 z-30">
+                  <Footer />
+                </div>
               </div>
             </Router>
           </POSOpeningProvider>

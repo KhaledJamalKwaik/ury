@@ -15,7 +15,12 @@ import { showToast } from './ui/toast';
 import { DINE_IN } from '../data/order-types';
 import { t } from '../i18n';
 
-const OrderPanel = () => {
+interface OrderPanelProps {
+  mobileMode?: boolean;
+  onClose?: () => void;
+}
+
+const OrderPanel = ({ mobileMode = false, onClose }: OrderPanelProps = {}) => {
   const { 
     activeOrders, 
     removeFromOrder, 
@@ -125,6 +130,7 @@ const OrderPanel = () => {
       // Reset all states after successful order submission
       resetOrderState();
       showToast.success(isUpdatingOrder ? t('success.order_updated') : t('success.order_created'));
+      if (mobileMode && onClose) onClose();
     } catch (error) {
       console.error('Failed to sync order:', error);
       // Frappe API error handling
@@ -180,7 +186,10 @@ const OrderPanel = () => {
   const isInteractionDisabled = isOrderInteractionDisabled() || isSubmitting;
 
   return (
-    <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+    <div className={cn(
+      "w-full 2xl:w-96 bg-white border-s border-gray-200 flex flex-col h-full",
+      !mobileMode && "fixed 2xl:relative end-0 z-10"
+    )}>
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <OrderTypeSelect disabled={isInteractionDisabled} />
         <div className="mt-3"><CustomerSelect disabled={isInteractionDisabled} /></div>

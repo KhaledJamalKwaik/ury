@@ -39,6 +39,7 @@
     "all_items": "All Items"
   },
   "cart": {
+    "title": "Your Order",
     "empty_title": "Your cart is empty",
     "empty_subtitle": "Add items to get started with your order",
     "click_to_add": "Click items to add them",

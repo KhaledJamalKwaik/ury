@@ -39,6 +39,7 @@
     "all_items": "Tous les articles"
   },
   "cart": {
+    "title": "Votre commande",
     "empty_title": "Votre panier est vide",
     "empty_subtitle": "Ajoutez des articles pour commencer votre commande",
     "click_to_add": "Cliquez sur les articles pour les ajouter",

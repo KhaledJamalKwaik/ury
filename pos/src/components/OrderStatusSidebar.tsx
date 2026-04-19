@@ -23,47 +23,70 @@ const OrderStatusSidebar = ({
   const statusTypes = getOrderStatusTypes(posProfile?.view_all_status, posProfile?.paid_limit);
 
   return (
-    <div className={cn(
-      "w-64 bg-white border-e border-gray-200 h-full flex flex-col",
-      disabled && "opacity-50 pointer-events-none"
-    )}>
-      <nav className="flex-1 p-6 overflow-y-auto">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          {/* Section Title */}
-          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3 px-1">
-            {t('orders.status_title')}
-          </h2>
-
-          {/* Status Items */}
-          <div className="space-y-1">
-            {statusTypes.map((status) => (
-              <Button
-                key={status.value}
-                onClick={() => setSelectedStatus(status.value as OrderStatusType)}
-                variant="ghost"
-                className={cn(
-                  'w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
-                  selectedStatus === status.value
-                    ? 'bg-white text-gray-900 shadow-sm font-semibold'
-                    : 'text-gray-700 hover:bg-white/60 hover:text-gray-900'
-                )}
-                disabled={disabled}
-              >
-                {/* Active indicator bar */}
-                {selectedStatus === status.value && (
-                  <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" />
-                )}
-                <div className="flex items-center gap-3 ms-1">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span>{t(`order_status_types.${status.value.toLowerCase().replace(/ /g, '_')}`)}</span>
-                </div>
-              </Button>
-            ))}
+    <>
+      {/* ── Desktop vertical sidebar (lg+) ── */}
+      <div className={cn(
+        "hidden lg:flex w-64 bg-white border-e border-gray-200 h-full flex-col",
+        disabled && "opacity-50 pointer-events-none"
+      )}>
+        <nav className="flex-1 p-6 overflow-y-auto">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3 px-1">
+              {t('orders.status_title')}
+            </h2>
+            <div className="space-y-1">
+              {statusTypes.map((status) => (
+                <Button
+                  key={status.value}
+                  onClick={() => setSelectedStatus(status.value as OrderStatusType)}
+                  variant="ghost"
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
+                    selectedStatus === status.value
+                      ? 'bg-white text-gray-900 shadow-sm font-semibold'
+                      : 'text-gray-700 hover:bg-white/60 hover:text-gray-900'
+                  )}
+                  disabled={disabled}
+                >
+                  {selectedStatus === status.value && (
+                    <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" />
+                  )}
+                  <div className="flex items-center gap-3 ms-1">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <span>{t(`order_status_types.${status.value.toLowerCase().replace(/ /g, '_')}`)}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
           </div>
+        </nav>
+      </div>
+
+      <div className={cn(
+        "flex lg:hidden w-full bg-white border-b border-gray-200 overflow-x-auto scrollbar-hide absolute top-0 start-0 end-0 z-10",
+        disabled && "opacity-50 pointer-events-none"
+      )}>
+        <div className="flex items-center gap-2 px-3 py-2 min-w-max">
+          {statusTypes.map((status) => (
+            <button
+              key={status.value}
+              onClick={() => setSelectedStatus(status.value as OrderStatusType)}
+              disabled={disabled}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all',
+                selectedStatus === status.value
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              )}
+            >
+              <FileText className="w-3 h-3" />
+              {t(`order_status_types.${status.value.toLowerCase().replace(/ /g, '_')}`)}
+            </button>
+          ))}
         </div>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 };
 
-export default OrderStatusSidebar; 
+export default OrderStatusSidebar;

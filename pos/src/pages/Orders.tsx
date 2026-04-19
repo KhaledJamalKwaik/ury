@@ -1,11 +1,11 @@
-  import React, { useEffect, useRef } from 'react';
-import { Clock, User, UserCheck, Receipt, Printer, Pencil, X } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Clock, User, UserCheck, Receipt, Printer, Pencil, X, ArrowLeft } from 'lucide-react';
 import { Badge, Button, Card, CardContent } from '../components/ui';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 import { showToast } from '../components/ui/toast';
 import OrderStatusSidebar from '../components/OrderStatusSidebar';
 import { useRootStore } from '../store/root-store';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, cn } from '../lib/utils';
 import { Spinner } from '../components/ui/spinner';
 import { Textarea } from '../components/ui/textarea';
 import { usePOSStore } from '../store/pos-store';
@@ -200,7 +200,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Left Sidebar - Order Types */}
       <OrderStatusSidebar
         selectedStatus={selectedStatus}
@@ -208,8 +208,9 @@ export default function Orders() {
       />
 
       {/* Middle Section - Order Cards */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-40">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+        {/* Padding on mobile to clear the absolute status strip + margin (approx 64px) */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-40 pt-16 lg:pt-4">
           {orderLoading ? (
             <div className="flex items-center justify-center h-full">
               <Spinner />
@@ -219,7 +220,7 @@ export default function Orders() {
               <p className="text-gray-500">{t('orders.no_orders_found')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 5xl:grid-cols-8 gap-4">
               {orders.map((order) => (
                 <Card 
                   key={order.name} 
@@ -301,8 +302,13 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Right Section - Order Details */}
-      <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      {/* Right Section - Order Details: fixed panel on md+, full-screen overlay on mobile */}
+      <div className={cn(
+        "bg-white flex flex-col z-40",
+        "fixed inset-0 2xl:static 2xl:inset-auto transition-transform duration-300",
+        "2xl:w-96 2xl:border-s 2xl:border-gray-200 2xl:h-full 2xl:translate-y-0 text-gray-900",
+        selectedOrder ? 'translate-y-0' : 'translate-y-full'
+      )}>
         {!selectedOrder ? (
           <div className="text-center h-full flex flex-col items-center justify-center text-gray-500 p-6">
             <p className="text-lg font-medium mb-2">{t('order.select_to_view')}</p>
@@ -320,7 +326,15 @@ export default function Orders() {
         ) : (
           <>
             {/* Fixed Header */}
-            <div className="sticky top-0 start-0 end-0 z-20 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between min-h-[64px]">
+            <div className="sticky top-0 start-0 end-0 z-20 bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center justify-between min-h-[64px]">
+              {/* Mobile back button */}
+              <button
+                className="2xl:hidden p-1.5 -ms-1.5 me-2 rounded-full hover:bg-gray-100 text-gray-500"
+                onClick={clearSelectedOrder}
+                aria-label="Back to orders"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
               <h2 className="text-xl font-semibold text-gray-900 truncate max-w-[10rem]">{selectedOrder.name}</h2>
               <div className="flex items-center gap-2">
                 {/* Only show edit and cancel buttons for Draft, Unbilled, and Recently Paid orders */}

@@ -30,7 +30,7 @@ export const formatInvoiceTime = (timestamp: string | null) => {
       return parsedDate.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
     }
 
-    const timeOnlyMatch = timestamp.match(/^(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d+))?$/);
+    const timeOnlyMatch = timestamp.match(/^(\d{1,2}):(\d{2}):(\d{1,2})(?:\.(\d+))?$/);
     if (timeOnlyMatch) {
       const [, hours, minutes, seconds] = timeOnlyMatch;
       const date = new Date();
